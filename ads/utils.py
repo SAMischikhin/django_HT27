@@ -1,19 +1,42 @@
 import csv
+import json
 import os
-from typing import List, Dict
+from typing import List
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = BASE_DIR.replace('ads', 'datasets')
-ADS_PATH = os.path.join(DATA_DIR, 'ads.csv')
-CATEGORIES_PATH = os.path.join(DATA_DIR, 'categories.csv')
+FIXTURE_DIR = BASE_DIR.replace('ads', 'fixtures')
 
 
-def cvs_to_dict(file_path: str) -> List[Dict[str, str]]:
-    csvfile = open(file_path, 'r', encoding='UTF-8')
-    field_names = csvfile.readline().strip().split(',')
-    reader = csv.DictReader(csvfile, field_names)
-    return [r for r in reader]
+def get_cvs_dict(cvs_data_path: str) -> List[str]:
+    with open(cvs_data_path, 'r', encoding='UTF-8') as csvfile:
+        field_names = csvfile.readline().strip().split(',')
+        return [r for r in csv.DictReader(csvfile, field_names)]
 
 
-categories_cvs_data = cvs_to_dict(CATEGORIES_PATH)
-ads_cvs_data = cvs_to_dict(ADS_PATH)
+def get_py_dict(cvslist: List[str]):
+    res = []
+    for key, item in enumerate(cvslist):
+        res.append({
+            "pk": key,
+            "model": "ads.category",
+            "fields": item
+                })
+    return res
+
+
+def create_fixtures(data_dir: str, fixture_dir: str, name: str):
+    cvs_data_path = os.path.join(data_dir, f'{name}.csv')
+    cvs_dict = get_cvs_dict(cvs_data_path)
+    data = get_py_dict(cvs_dict)
+    json_data_path = os.path.join(fixture_dir, f'{name}.json')
+
+    with open(json_data_path, 'w', encoding='UTF-8') as jsonfile:
+        json.dump(data, jsonfile, sort_keys=False, indent=4, separators=(',', ': '), ensure_ascii=False)
+
+    jsonfile.close()
+
+
+NAMES = ('ads', 'categories')
+for name in NAMES:
+    create_fixtures(DATA_DIR, FIXTURE_DIR, name)

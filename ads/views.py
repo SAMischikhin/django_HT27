@@ -5,7 +5,6 @@ from django.http import JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView
 
-from ads.utils import *
 from ads.models import Categories, Ads
 import json
 
@@ -13,11 +12,6 @@ import json
 class Index(View):
     def get(self, request):
         return JsonResponse({'status': 'ok'}, status=200)
-
-
-class Test(View):
-    def get(self, request):
-        return JsonResponse(ads_cvs_data, safe=False)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -85,9 +79,9 @@ class ViewAd(View):
         })
 
 
-
 class CatDetailView(DetailView):
     model = Categories
+
     def get(self, *args, **kwargs):
         try:
             category = self.get_object()
@@ -101,6 +95,7 @@ class CatDetailView(DetailView):
 
 class AdDetailView(DetailView):
     model = Ads
+
     def get(self, *args, **kwargs):
         try:
             item = self.get_object()
